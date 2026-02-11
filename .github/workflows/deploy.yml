@@ -1,0 +1,41 @@
+name: Deploy Azure Function (Node + Playwright)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+
+      - name: Create deploy zip
+        run: |
+          zip -r app.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "local.settings.json" \
+            -x "saida.png"
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: "RenderHtmlImage"   # 🔴 CONFIRME o nome exato da Function App no Azure
+          package: "app.zip"
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
