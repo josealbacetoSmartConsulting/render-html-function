@@ -34,7 +34,7 @@ jobs:
             -x "saida.png"
 
       - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
+        uses: Azure/functions-action@v3
         with:
           app-name: "RenderHtmlImage"   # 🔴 CONFIRME o nome exato da Function App no Azure
           package: "app.zip"
