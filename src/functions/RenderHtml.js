@@ -26,9 +26,18 @@ app.http("RenderHtml", {
         return { status: 400, jsonBody: { error: "Envie maxwidth válido (> 0)" } };
       }
 
+      // Configurações otimizadas para Azure Functions Linux
       browser = await chromium.launch({
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--disable-gpu",
+          "--disable-software-rasterizer",
+          "--disable-web-security"
+        ]
       });
 
       const page = await browser.newPage({
@@ -48,8 +57,20 @@ app.http("RenderHtml", {
         jsonBody: { base64: buffer.toString("base64") }
       };
     } catch (err) {
-      context.log(err?.stack || err);
-      return { status: 500, jsonBody: { error: err?.message ?? String(err) } };
+      context.error("Erro ao renderizar HTML:", err?.stack || err);
+      
+      // Log adicional para diagnóstico
+      if (err?.message?.includes("libglib")) {
+        context.error("ERRO: Dependências do sistema não instaladas. Execute install-dependencies.sh");
+      }
+      
+      return { 
+        status: 500, 
+        jsonBody: { 
+          error: err?.message ?? String(err),
+          details: process.env.NODE_ENV === "development" ? err?.stack : undefined
+        } 
+      };
     } finally {
       if (browser) {
         try { await browser.close(); } catch (_) {}

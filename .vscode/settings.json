@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    ".funcignore": "ignore",
+    "*.funcignore": "ignore"
+  }
+}
