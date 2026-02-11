@@ -39,3 +39,6 @@ jobs:
           app-name: "RenderHtmlImage"   # 🔴 CONFIRME o nome exato da Function App no Azure
           package: "app.zip"
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          sku: flexconsumption
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
